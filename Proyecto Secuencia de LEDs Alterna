@@ -1,0 +1,28 @@
+;------------ INFORMACI?N --------------
+; Nombre   : Secuencia de LEDs alterna
+; Micro    : PICAXE-08M2
+; Entradas : Ninguna
+; Salidas  : B.0 a B.7
+; Funci?n  : Encender 8 LEDs de forma alterna cada 0.5 segundos
+;----------------------------------------
+
+;------------ INICIALIZACI?N -------------
+
+; Configuraci?n de pines como salida
+for b = 0 to 7
+    low B.b       ; Asegura que todos los LEDs est?n apagados al inicio
+next b
+
+;------------ BUCLE PRINCIPAL -------------
+Do
+    for b = 0 to 7
+        high B.b      ; Enciende una salida
+        pause 500     ; Espera medio segundo
+        low B.b       ; Apaga la salida
+        pause 500     ; Espera medio segundo antes de pasar al siguiente
+    next b
+Loop
+
+;------------ SUBRUTINAS -----------------
+; 
+;----------------------------------------
