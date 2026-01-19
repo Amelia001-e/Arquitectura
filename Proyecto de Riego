@@ -1,0 +1,72 @@
+;=============================================
+;   INFORMACION
+;---------------------------------------------
+;   Nombre    : Sistema de Riego Autom?tico
+;   Micro     : PICAXE-20M2
+;   Entradas  : 
+;       C.0 -> S (Sensor de humedad: Tierra seca=1 / H?meda=0)
+;       C.1 -> R (Restricci?n de riego: Restricci?n=1 / No restricci?n=0)
+;       C.2 -> D (Sensor d?a/noche: D?a=1 / Noche=0)
+;       C.3 -> V (Sensor dep?sito: Vac?o=1 / Hay agua=0)
+;   Salidas   : 
+;       C.4 -> B (Salida bomba: Encendida=1 / Apagada=0)
+;   Funcion   : 
+;       Controlar la bomba de agua seg?n humedad del suelo, disponibilidad de agua,
+;       horario permitido (d?a/noche) y restricciones de temporada.
+;=============================================
+
+;---------------------------------------------
+; INICIALIZACION
+;---------------------------------------------
+symbol bomba = 4        ' Salida: bomba en pin 4 (C.4)
+
+' Configuraci?n de pines
+dirsC = %00010000       ' C.4 como salida, C.0 a C.3 como entradas
+
+;---------------------------------------------
+; BUCLE PRINCIPAL
+;---------------------------------------------
+main:
+    ; Leer sensores directamente
+    if pinC.3 = 0 then
+        ; Hay agua en el dep?sito
+        if pinC.0 = 1 then
+            ; Tierra seca
+            if pinC.1 = 1 then
+                ; Hay restricciones
+                if pinC.2 = 0 then
+                    ; Es de noche, regar
+                    gosub encender_bomba
+                else
+                    ; Es de d?a, no regar
+                    gosub apagar_bomba
+                endif
+            else
+                ; No hay restricciones, regar de d?a o de noche
+                gosub encender_bomba
+            endif
+        else
+            ; Tierra h?meda, no regar
+            gosub apagar_bomba
+        endif
+    else
+        ; Dep?sito vac?o, no regar
+        gosub apagar_bomba
+    endif
+
+    pause 500
+    goto main
+
+;---------------------------------------------
+; SUBRUTINAS
+;---------------------------------------------
+
+; Encender la bomba
+encender_bomba:
+    high bomba
+    return
+
+; Apagar la bomba
+apagar_bomba:
+    low bomba
+    return
