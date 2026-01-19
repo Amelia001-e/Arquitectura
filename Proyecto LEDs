@@ -1,0 +1,117 @@
+;------------ INFORMACI?N --------------
+; Nombre   : Control de LEDs con botones
+; Micro    : PICAXE-08M2
+; Entradas : B.0 a B.3 (Botones)
+; Salidas  : C.0 a C.3 (LEDs)
+; Funci?n  : Controlar el encendido de LEDs con diferentes patrones seg?n la cantidad de botones presionados
+;----------------------------------------
+
+;------------ INICIALIZACI?N -------------
+
+symbol led1 = C.0
+symbol led2 = C.1
+symbol led3 = C.2
+symbol led4 = C.3
+
+symbol btn1 = B.0
+symbol btn2 = B.1
+symbol btn3 = B.2
+symbol btn4 = B.3
+
+symbol estadoBtn1 = b0
+symbol estadoBtn2 = b1
+symbol estadoBtn3 = b2
+symbol estadoBtn4 = b3
+
+symbol presionados = b4
+
+;------------ BUCLE PRINCIPAL -------------
+main:
+    ; Leer los estados de los botones
+    estadoBtn1 = pinB.0
+    estadoBtn2 = pinB.1
+    estadoBtn3 = pinB.2
+    estadoBtn4 = pinB.3
+
+    ; Contar cu?ntos botones est?n presionados
+    presionados = estadoBtn1 + estadoBtn2 + estadoBtn3 + estadoBtn4
+
+    ; Comprobar si solo el bot?n 4 est? activado (modo p?nico)
+    if estadoBtn4 = 1 and estadoBtn1 = 0 and estadoBtn2 = 0 and estadoBtn3 = 0 then
+        gosub secuencia_panico
+    else
+        ; Si hay dos botones activos, no hacer nada
+        if presionados = 2 then
+            gosub apagar_leds
+        endif
+
+        ; Si hay tres botones activos, alarma lenta
+        if presionados = 3 then
+            gosub secuencia_alarma_lenta
+        endif
+
+        ; Si hay cuatro botones activos, alarma r?pida
+        if presionados = 4 then
+            gosub secuencia_alarma_rapida
+        endif
+    endif
+
+    goto main
+
+;------------ SUBRUTINAS -----------------
+
+; Apagar LEDs
+apagar_leds:
+    low led1
+    low led2
+    low led3
+    low led4
+    return
+
+; Secuencia de alarma lenta
+secuencia_alarma_lenta:
+    for b5 = 1 to 5
+        high led1
+        high led3
+        pause 500
+        low led1
+        low led3
+        high led2
+        high led4
+        pause 500
+        low led2
+        low led4
+    next b5
+    return
+
+; Secuencia de alarma r?pida
+secuencia_alarma_rapida:
+    for b5 = 1 to 5
+        high led1
+        high led3
+        pause 200
+        low led1
+        low led3
+        high led2
+        high led4
+        pause 200
+        low led2
+        low led4
+    next b5
+    return
+
+; Secuencia de p?nico
+secuencia_panico:
+    for b5 = 1 to 10
+        high led1
+        high led2
+        low led3
+        low led4
+        pause 150
+        low led1
+        low led2
+        high led3
+        high led4
+        pause 150
+    next b5
+    return
