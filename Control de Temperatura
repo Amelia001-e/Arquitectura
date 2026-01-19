@@ -1,0 +1,98 @@
+;=============================================
+;   INFORMACION
+;---------------------------------------------
+;   Nombre    : Control de Temperatura con LCD
+;   Micro     : PICAXE 20M2
+;   Entradas  : Simulaci?n de temperatura
+;   Salidas   : B.7 (Ventilador - LED o motor), LCD 16x2 en paralelo
+;   Funcion   : Muestra temperatura en pantalla y activa un ventilador si ?29?C
+;=============================================
+
+;---------------------------------------------
+; INICIALIZACION
+;---------------------------------------------
+symbol longitud = 16
+symbol enable = C.1                  ; Enable High:Enable Low:Disable
+symbol rs = C.0                      ; RS High:Ascii Low:Comando
+symbol temp = b0
+symbol ventilador = B.7
+
+let dirsc = %00000011               ; C.0 y C.1 como salida
+let dirsb = %11111111               ; Puerto B como salida completa
+setfreq m8
+
+;---------------------------------------------
+; BUCLE PRINCIPAL
+;---------------------------------------------
+main:
+    pause 15
+    gosub LCD_init
+
+bucle:
+    let temp = 30                   ; Temperatura simulada
+
+    gosub clsc
+    gosub linea1
+    gosub mostrar_temp
+
+    if temp >= 29 then
+        high ventilador
+        gosub linea2
+        gosub ventilador_on
+    elseif temp <= 27 then
+        low ventilador
+        gosub linea2
+        gosub ventilador_off
+    endif
+
+    pause 2000
+    goto bucle
+
+;---------------------------------------------
+; SUBRUTINAS LCD Y MENSAJES
+;---------------------------------------------
+LCD_init:
+    low rs
+    let pinsB = %00110000
+    pulsout enable, 1
+    pause 5
+    pulsout enable, 1
+    pulsout enable, 1
+    let pinsB = %00111000
+    pulsout enable, 1
+
+    let pinsB = %00000001
+    pulsout enable, 1
+    pause 8
+
+    let pinsB = %00000010
+    pulsout enable, 1
+    let pinsB = %00000110
+    pulsout enable, 1
+    let pinsB = %00001100
+    pulsout enable, 1
+    high rs
+    return
+
+clsc:
+    low rs
+    let pinsB = %00000001
+    pulsout enable, 1
+    pause 8
+    high rs
+    return
+
+linea1:
+    low rs
+    let pinsB = 128
+    pulsout enable, 1
+    high rs
+    return
+
+linea2:
+    low rs
+    let pinsB = 192
+    pulsout enable, 1
+    high rs
+    return
+
